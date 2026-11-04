@@ -1,52 +1,111 @@
-// WhatsApp number: country code + number, digits only (no +, spaces or hyphens).
-const WHATSAPP_NUMBER = "9779767799863";
+/**
+ * Hamro Surprise — site behaviour
+ * Static site: no data is stored. Bookings open a pre-filled WhatsApp chat.
+ */
+"use strict";
 
-const menuToggle = document.getElementById("menuToggle");
-const navLinks = document.getElementById("navLinks");
-menuToggle.addEventListener("click", () => {
-  const open = navLinks.classList.toggle("open");
-  menuToggle.setAttribute("aria-expanded", String(open));
+const CONFIG = Object.freeze({
+  // Country code + number, digits only (no +, spaces or hyphens).
+  whatsappNumber: "9779745260730",
+  businessName: "Hamro Surprise",
+  // Nepali mobile numbers: 97/98 followed by 8 digits.
+  phonePattern: /^9[78]\d{8}$/,
 });
-navLinks.querySelectorAll("a").forEach(link => link.addEventListener("click", () => {
-  navLinks.classList.remove("open");
-  menuToggle.setAttribute("aria-expanded", "false");
-}));
-document.getElementById("year").textContent = new Date().getFullYear();
 
-document.querySelectorAll(".choose-package").forEach(button => {
-  button.addEventListener("click", () => {
-    document.getElementById("packageSelect").value = button.dataset.package;
-    document.getElementById("booking").scrollIntoView({ behavior: "smooth" });
+const $ = (selector, scope = document) => scope.querySelector(selector);
+const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
+
+/* ---------- Navigation ---------- */
+function initNavigation() {
+  const toggle = $("#menuToggle");
+  const links = $("#navLinks");
+  if (!toggle || !links) return;
+
+  const setOpen = (open) => {
+    links.classList.toggle("open", open);
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+  };
+
+  toggle.addEventListener("click", () => setOpen(!links.classList.contains("open")));
+  $$("a", links).forEach((a) => a.addEventListener("click", () => setOpen(false)));
+  document.addEventListener("keydown", (e) => e.key === "Escape" && setOpen(false));
+}
+
+/* ---------- Package buttons ---------- */
+function initPackageButtons() {
+  const select = $("#packageSelect");
+  $$(".choose-package").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (select) select.value = button.dataset.package;
+      $("#booking")?.scrollIntoView({ behavior: "smooth" });
+    });
   });
-});
+}
 
-const dateInput = document.querySelector('input[name="date"]');
-const today = new Date();
-const localToday = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-dateInput.min = localToday;
+/* ---------- Booking form ---------- */
+function localISODate(date) {
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+}
 
-document.getElementById("bookingForm").addEventListener("submit", event => {
-  event.preventDefault();
-  const error = document.getElementById("formError");
-  error.textContent = "";
-  if (!/^977\d{9,10}$/.test(WHATSAPP_NUMBER)) {
-    error.textContent = "Website admin: script.js मा सही WhatsApp नम्बर राख्नुहोस्।";
-    return;
-  }
-  const form = new FormData(event.currentTarget);
-  const message = [
-    "✨ NEW BOOKING REQUEST — HAMRO SURPRISE ✨", "",
-    `Customer name: ${form.get("name")}`,
-    `Phone: ${form.get("phone")}`,
-    `Service: ${form.get("service")}`,
-    `Package: ${form.get("package")}`,
-    `City: ${form.get("city")}`,
-    `Preferred date: ${form.get("date")}`,
-    `Delivery address: ${form.get("address")}`,
-    `Recipient: ${form.get("recipient") || "Not provided"}`,
-    `Additional details: ${form.get("message") || "None"}`, "",
-    "Please confirm availability and final price."
+function buildMessage(data) {
+  const field = (key, fallback = "") => (data.get(key) || fallback).toString().trim();
+  return [
+    `✨ NEW BOOKING REQUEST — ${CONFIG.businessName.toUpperCase()} ✨`,
+    "",
+    `Customer name: ${field("name")}`,
+    `Phone: ${field("phone")}`,
+    `Service: ${field("service")}`,
+    `Package: ${field("package")}`,
+    `City: ${field("city")}`,
+    `Preferred date: ${field("date")}`,
+    `Preferred time: ${field("time", "Flexible")}`,
+    `Delivery address: ${field("address")}`,
+    `Recipient: ${field("recipient", "Not provided")}`,
+    `Additional details: ${field("message", "None")}`,
+    "",
+    "Please confirm availability and final price.",
   ].join("\n");
-  const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-  window.open(url, "_blank", "noopener,noreferrer");
+}
+
+function initBookingForm() {
+  const form = $("#bookingForm");
+  if (!form) return;
+  const error = $("#formError");
+  const dateInput = form.elements.date;
+  if (dateInput) dateInput.min = localISODate(new Date());
+
+  const showError = (msg) => { error.textContent = msg; };
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    showError("");
+
+    const phone = form.elements.phone.value.replace(/[\s-]/g, "").replace(/^\+?977/, "");
+    if (!CONFIG.phonePattern.test(phone)) {
+      showError("कृपया सही मोबाइल नम्बर राख्नुहोस् (जस्तै 98XXXXXXXX)।");
+      form.elements.phone.focus();
+      return;
+    }
+    form.elements.phone.value = phone;
+
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
+    const message = buildMessage(new FormData(form));
+    const url = `https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(message)}`;
+    const win = window.open(url, "_blank", "noopener,noreferrer");
+    if (!win) window.location.href = url; // popup blocked (common on mobile)
+  });
+}
+
+/* ---------- Init ---------- */
+document.addEventListener("DOMContentLoaded", () => {
+  const year = $("#year");
+  if (year) year.textContent = new Date().getFullYear();
+  initNavigation();
+  initPackageButtons();
+  initBookingForm();
 });
