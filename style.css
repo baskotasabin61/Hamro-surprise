@@ -217,3 +217,60 @@ h1 em, h2 em { color: var(--gold); font-style: normal; }
   .form-row { grid-template-columns: 1fr; }
   .footer-inner { flex-direction: column; text-align: center; }
 }
+
+/* ==========================================================================
+   11. Motion & effects
+   Content is visible by default; .reveal is added by script.js only.
+   ========================================================================== */
+.scroll-progress { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #c39a60, #f0d7a9); transform: scaleX(0); transform-origin: left; z-index: 60; }
+.header { transition: height .3s, box-shadow .3s; }
+.header.scrolled { height: 68px; box-shadow: 0 6px 24px rgba(41,32,54,.08); }
+.nav-links > a:not(.nav-book) { position: relative; }
+.nav-links > a:not(.nav-book)::after { content: ""; position: absolute; left: 0; right: 0; bottom: -4px; height: 2px; background: var(--gold); transform: scaleX(0); transition: transform .3s; }
+.nav-links > a.active::after, .nav-links > a:not(.nav-book):hover::after { transform: scaleX(1); }
+
+/* Scroll reveal */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .8s cubic-bezier(.2,.7,.2,1) var(--delay, 0ms), transform .8s cubic-bezier(.2,.7,.2,1) var(--delay, 0ms); }
+.reveal.is-visible { opacity: 1; transform: none; }
+
+/* Hero entrance + floating particles */
+@keyframes rise { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }
+.hero-content > * { animation: rise .9s cubic-bezier(.2,.7,.2,1) both; }
+.hero-content > :nth-child(1) { animation-delay: .1s; }
+.hero-content > :nth-child(2) { animation-delay: .25s; }
+.hero-content > :nth-child(3) { animation-delay: .45s; }
+.hero-content > :nth-child(4) { animation-delay: .6s; }
+.hero-content > :nth-child(5) { animation-delay: .75s; }
+.hero h1 em { background: linear-gradient(100deg, #d5ad70 20%, #fff2d6 50%, #d5ad70 80%); background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 5s linear infinite; }
+@keyframes shimmer { to { background-position: -220% 0; } }
+.hero-particles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; }
+.hero-particles span { position: absolute; bottom: -30px; color: rgba(231,201,148,.55); animation: floatUp linear infinite; }
+@keyframes floatUp { 0% { transform: translateY(0) rotate(0); opacity: 0; } 12% { opacity: 1; } 100% { transform: translateY(-720px) rotate(200deg); opacity: 0; } }
+.hero-stamp { animation: spinSlow 30s linear infinite; }
+@keyframes spinSlow { from { transform: rotate(12deg); } to { transform: rotate(372deg); } }
+.art-inner i { display: inline-block; animation: pulse 2.6s ease-in-out infinite; }
+@keyframes pulse { 50% { transform: scale(1.35); opacity: .7; } }
+
+/* Hover polish */
+.btn-gold, .nav-book { position: relative; overflow: hidden; }
+.btn-gold::after { content: ""; position: absolute; top: 0; left: -80%; width: 50%; height: 100%; background: linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent); transform: skewX(-20deg); transition: left .6s; }
+.btn-gold:hover::after { left: 130%; }
+.service-card, .package, .steps li, .contact-card { transition: transform .35s, box-shadow .35s, border-color .35s; }
+.service-card:hover, .package:hover, .steps li:hover, .contact-card:hover { transform: translateY(-8px); box-shadow: 0 22px 44px rgba(57,42,72,.12); border-color: #d5ad70; }
+.service-icon { display: inline-block; transition: transform .4s; }
+.service-card:hover .service-icon { transform: scale(1.2) rotate(-8deg); }
+.package-featured { animation: glow 3.5s ease-in-out infinite; }
+@keyframes glow { 50% { box-shadow: 0 18px 55px rgba(213,173,112,.4); } }
+.gallery-tile { overflow: hidden; background-size: 100%; transition: background-size .8s; }
+.gallery-tile:hover { background-size: 112%; }
+.wa-float { animation: ring 3s ease-in-out infinite; transition: transform .2s; }
+.wa-float:hover { transform: scale(1.08); }
+@keyframes ring { 0%, 100% { box-shadow: 0 0 0 0 rgba(37,211,102,.5), 0 8px 22px rgba(0,0,0,.2); } 60% { box-shadow: 0 0 0 16px rgba(37,211,102,0), 0 8px 22px rgba(0,0,0,.2); } }
+.faq details p { animation: fadeIn .4s; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; }
+  .hero-content > *, .hero h1 em, .hero-stamp, .art-inner i, .package-featured, .wa-float { animation: none !important; }
+  .hero h1 em { -webkit-text-fill-color: var(--gold); }
+}

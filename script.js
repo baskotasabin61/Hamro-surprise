@@ -101,6 +101,75 @@ function initBookingForm() {
   });
 }
 
+/* ---------- Motion & effects ---------- */
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function initScrollReveal() {
+  if (reduceMotion || !("IntersectionObserver" in window)) return;
+  const groups = [
+    ".intro-art", ".intro-copy", ".section-head", ".trust-grid > div", ".service-card",
+    ".steps li", ".package", ".custom-callout", ".gallery-tile", ".booking-intro",
+    ".booking-form", ".faq details", ".contact-card",
+  ];
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add("is-visible");
+      observer.unobserve(entry.target);
+    });
+  }, { threshold: 0.15, rootMargin: "0px 0px -40px 0px" });
+
+  groups.forEach((selector) => {
+    $$(selector).forEach((el, i) => {
+      el.classList.add("reveal");
+      el.style.setProperty("--delay", `${(i % 4) * 90}ms`);
+      observer.observe(el);
+    });
+  });
+}
+
+function initHeroParticles() {
+  const layer = $("#heroParticles");
+  if (!layer || reduceMotion) return;
+  const symbols = ["✦", "♥", "✧", "●"];
+  for (let i = 0; i < 16; i++) {
+    const p = document.createElement("span");
+    p.textContent = symbols[i % symbols.length];
+    p.style.left = `${Math.random() * 100}%`;
+    p.style.fontSize = `${10 + Math.random() * 16}px`;
+    p.style.animationDuration = `${9 + Math.random() * 10}s`;
+    p.style.animationDelay = `${-Math.random() * 14}s`;
+    layer.appendChild(p);
+  }
+}
+
+function initScrollEffects() {
+  const header = $(".header");
+  const bar = document.createElement("div");
+  bar.className = "scroll-progress";
+  bar.setAttribute("aria-hidden", "true");
+  document.body.appendChild(bar);
+
+  const links = $$(".nav-links > a[href^='#']:not(.nav-book)");
+  const sections = links.map((a) => $(a.getAttribute("href"))).filter(Boolean);
+
+  let ticking = false;
+  const update = () => {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.transform = `scaleX(${max > 0 ? window.scrollY / max : 0})`;
+    header.classList.toggle("scrolled", window.scrollY > 30);
+    const pos = window.scrollY + 140;
+    let current = null;
+    sections.forEach((s) => { if (s.offsetTop <= pos) current = s.id; });
+    links.forEach((a) => a.classList.toggle("active", a.getAttribute("href") === `#${current}`));
+    ticking = false;
+  };
+  window.addEventListener("scroll", () => {
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  }, { passive: true });
+  update();
+}
+
 /* ---------- Init ---------- */
 document.addEventListener("DOMContentLoaded", () => {
   const year = $("#year");
@@ -108,4 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initNavigation();
   initPackageButtons();
   initBookingForm();
+  initScrollReveal();
+  initHeroParticles();
+  initScrollEffects();
 });
