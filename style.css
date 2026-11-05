@@ -59,7 +59,7 @@ h1 em, h2 em { color: var(--gold); font-style: normal; }
 /* 4. Hero */
 .hero { min-height: 660px; position: relative; display: flex; align-items: center; color: #fff; overflow: hidden;
   background: linear-gradient(90deg, rgba(30,20,39,.95), rgba(41,29,48,.83) 52%, rgba(41,29,48,.3)),
-              url("images/banner.jpeg") center/cover,
+              url("images/banner.jpeg ") center/cover,
               #292036; }
 .hero-content { position: relative; z-index: 2; padding: 100px 0; }
 .hero .eyebrow { color: var(--gold); }
@@ -127,7 +127,7 @@ h1 em, h2 em { color: var(--gold); font-style: normal; }
 .gallery-tile::before { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent, rgba(20,14,25,.72)); }
 .gallery-tile span { position: relative; font-family: Georgia, serif; font-size: 1.3rem; }
 /* Replace these URLs with your own photos (e.g. images/birthday.jpg). */
-.tile-one { background-image: url("https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?auto=format&fit=crop&w=900&q=80"); }
+.tile-one { background-image: url("images/birthday.png  "); }
 .tile-two { background-image: url("https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=900&q=80"); }
 .tile-three { background-image: url("https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=900&q=80"); }
 .gallery-note { text-align: center; color: #bdb2c5; font-size: .78rem; margin: 20px 0 0; }
